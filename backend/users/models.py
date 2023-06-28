@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 
+
 class СustomUser(AbstractUser):
     email = models.EmailField(
         'Email',
@@ -23,13 +24,13 @@ class СustomUser(AbstractUser):
         Group,
         verbose_name='groups',
         blank=True,
-        related_name='customuser_set'  
+        related_name='customuser_set'
     )
     user_permissions = models.ManyToManyField(
         Permission,
         verbose_name='user permissions',
         blank=True,
-        related_name='customuser_set'  
+        related_name='customuser_set'
     )
 
     class Meta:
