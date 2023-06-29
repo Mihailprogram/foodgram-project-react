@@ -2,7 +2,7 @@ import io
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from django.db.models.aggregates import Count, Sum
+from django.db.models.aggregates import Count
 from django.db.models.expressions import Exists, OuterRef, Value
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -237,7 +237,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         """Качаем список с ингредиентами."""
         recipe = request.user.shopping_cart.recipe
         buffer = self.generate_shopping_cart_pdf(recipe)
-        return FileResponse(buffer, as_attachment=True, 
+        return FileResponse(buffer, as_attachment=True,
                             filename='shopping_cart.pdf')
 
 

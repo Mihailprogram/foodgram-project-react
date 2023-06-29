@@ -1,11 +1,11 @@
 import django.contrib.auth.password_validation as validators
 from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscriber, Tag
+from recipes.models import (Ingredient, Recipe, RecipeIngredient,
+                            Subscriber, Tag)
 
 User = get_user_model()
 ERR_MSG = 'Не удается войти в систему с предоставленными учетными данными.'
@@ -180,9 +180,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         existing_ingredients = Ingredient.objects.exclude(
             id__in=ingredient_ids)
         if existing_ingredients.exists():
-            non_existing_ingredient_ids = existing_ingredients.values_list('id', flat=True)
+            non_ingredient_ids = existing_ingredients.values_list(
+                'id', flat=True)
             raise serializers.ValidationError(
-                f'Ингредиенты с id {non_existing_ingredient_ids} не существуют!')
+                f'Ингредиенты с id {non_ingredient_ids} не существуют!')
         tags = data['tags']
         if not tags:
             raise serializers.ValidationError(
