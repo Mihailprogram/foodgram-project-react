@@ -19,13 +19,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',
-    'recipes.apps.RecipesConfig',
-    'api.apps.ApiConfig',
     'djoser',
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'users.apps.UsersConfig',
+    'recipes.apps.RecipesConfig',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -91,6 +91,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+PAGE_SIZE = 6
 
 STATIC_URL = 'static/'
 

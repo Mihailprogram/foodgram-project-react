@@ -48,7 +48,7 @@ class Ingredient(models.Model):
         return f'{self.name}, {self.measurement_unit}.'
 
 
-class Recept(models.Model):
+class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -64,8 +64,6 @@ class Recept(models.Model):
         null=True)
     text = models.TextField(
         'Описание рецепта')
-    cooking_time = models.BigIntegerField(
-        'Время приготовления рецепта')
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient')
@@ -92,11 +90,11 @@ class Recept(models.Model):
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
-        Recept,
+        Recipe,
         on_delete=models.CASCADE,
-        related_name='recipe')
+        related_name='recipe_ingredients')
     ingredient = models.ForeignKey(
-        'Ingredient',
+        Ingredient,
         on_delete=models.CASCADE,
         related_name='ingredient')
     amount = models.PositiveSmallIntegerField(
@@ -116,7 +114,7 @@ class RecipeIngredient(models.Model):
                 name='unique ingredient')]
 
 
-class Subscribe(models.Model):
+class Subscriber(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -152,7 +150,7 @@ class FavoriteRecipe(models.Model):
         related_name='favorite_recipe',
         verbose_name='Пользователь')
     recipe = models.ManyToManyField(
-        Recept,
+        Recipe,
         related_name='favorite_recipe',
         verbose_name='Избранный рецепт')
 
@@ -179,7 +177,7 @@ class ShoppingCart(models.Model):
         null=True,
         verbose_name='Пользователь')
     recipe = models.ManyToManyField(
-        Recept,
+        Recipe,
         related_name='shopping_cart',
         verbose_name='Покупка')
 

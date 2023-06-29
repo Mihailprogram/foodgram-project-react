@@ -1,8 +1,8 @@
 from django.core.exceptions import ValidationError
 import django_filters as filters
 
-from users.models import СustomUser
-from recipes.models import Ingredient, Recept
+from users.models import CustomUser
+from recipes.models import Ingredient, Recipe
 
 
 class TagsMultipleChoiceField(
@@ -34,7 +34,7 @@ class IngredientFilter(filters.FilterSet):
 
 class RecipeFilter(filters.FilterSet):
     author = filters.ModelChoiceFilter(
-        queryset=СustomUser.objects.all())
+        queryset=CustomUser.objects.all())
     is_in_shopping_cart = filters.BooleanFilter(
         widget=filters.widgets.BooleanWidget(),
         label='В корзине.')
@@ -46,5 +46,5 @@ class RecipeFilter(filters.FilterSet):
         label='Ссылка')
 
     class Meta:
-        model = Recept
+        model = Recipe
         fields = ['is_favorited', 'is_in_shopping_cart', 'author', 'tags']

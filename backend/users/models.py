@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 
 
-class СustomUser(AbstractUser):
+class CustomUser(AbstractUser):
     email = models.EmailField(
         'Email',
         max_length=200,
@@ -42,4 +42,4 @@ class СustomUser(AbstractUser):
         return self.email
 
     def get_full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return f'{self.first_name} {self.last_name}'

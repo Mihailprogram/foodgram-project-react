@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Recept, RecipeIngredient, Subscribe, Tag
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscriber, Tag
 
 User = get_user_model()
 ERR_MSG = 'Не удается войти в систему с предоставленными учетными данными.'
@@ -89,11 +89,8 @@ class UserPasswordSerializer(serializers.Serializer):
 
     def validate_current_password(self, current_password):
         user = self.context['request'].user
-        if not authenticate(
-                username=user.email,
-                password=current_password):
-            raise serializers.ValidationError(
-                ERR_MSG, code='authorization')
+        if not user.check_password(current_password):
+            raise serializers.ValidationError('Неверный текущий пароль.')
         return current_password
 
     def validate_new_password(self, new_password):
@@ -102,9 +99,8 @@ class UserPasswordSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
-        password = make_password(
-            validated_data.get('new_password'))
-        user.password = password
+        new_password = validated_data['new_password']
+        user.set_password(new_password)
         user.save()
         return validated_data
 
@@ -121,7 +117,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = '__all__'
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -173,20 +169,20 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         many=True)
 
     class Meta:
-        model = Recept
-        fields = '__all__'
+        model = Recipe
+        fields = ('id', 'author', 'name', 'image', 'text', 'cooking_time',
+                  'ingredients', 'tags', 'pub_date')
         read_only_fields = ('author',)
 
     def validate(self, data):
         ingredients = data['ingredients']
-        ingredient_list = []
-        for items in ingredients:
-            ingredient = get_object_or_404(
-                Ingredient, id=items['id'])
-            if ingredient in ingredient_list:
-                raise serializers.ValidationError(
-                    'Ингредиент должен быть уникальным!')
-            ingredient_list.append(ingredient)
+        ingredient_ids = [ingredient['id'] for ingredient in ingredients]
+        existing_ingredients = Ingredient.objects.exclude(
+            id__in=ingredient_ids)
+        if existing_ingredients.exists():
+            non_existing_ingredient_ids = existing_ingredients.values_list('id', flat=True)
+            raise serializers.ValidationError(
+                f'Ингредиенты с id {non_existing_ingredient_ids} не существуют!')
         tags = data['tags']
         if not tags:
             raise serializers.ValidationError(
@@ -215,15 +211,17 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
-            RecipeIngredient.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'), )
+            ingredient_id = ingredient.get('id')
+            ingredient_obj = get_object_or_404(Ingredient, id=ingredient_id)
+            amount = ingredient.get('amount')
+            RecipeIngredient.objects.create(recipe=recipe,
+                                            ingredient=ingredient_obj,
+                                            amount=amount)
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recept.objects.create(**validated_data)
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)
         return recipe
@@ -265,18 +263,19 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         read_only=True)
 
     class Meta:
-        model = Recept
-        fields = '__all__'
+        model = Recipe
+        fields = ('id', 'author', 'name', 'image', 'text', 'cooking_time',
+                  'ingredients', 'tags', 'pub_date')
 
 
-class SubscribeRecipeSerializer(serializers.ModelSerializer):
+class SubscriberRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Recept
+        model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class SubscribeSerializer(serializers.ModelSerializer):
+class SubscriberSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(
         source='author.id')
     email = serializers.EmailField(
@@ -294,7 +293,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
         read_only=True)
 
     class Meta:
-        model = Subscribe
+        model = Subscriber
         fields = (
             'email', 'id', 'username', 'first_name', 'last_name',
             'is_subscribed', 'recipes', 'recipes_count',)
@@ -305,6 +304,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
         recipes = (
             obj.author.recipe.all()[:int(limit)] if limit
             else obj.author.recipe.all())
-        return SubscribeRecipeSerializer(
+        return SubscriberRecipeSerializer(
             recipes,
             many=True).data

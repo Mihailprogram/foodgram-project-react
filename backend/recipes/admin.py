@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from .models import (FavoriteRecipe, Ingredient, Recept, RecipeIngredient,
-                     ShoppingCart, Subscribe, Tag)
+from .models import (FavoriteRecipe, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingCart, Subscriber, Tag)
 
 EMPTY_MSG = '-пусто-'
 
@@ -11,7 +11,7 @@ class RecipeIngredientAdmin(admin.StackedInline):
     autocomplete_fields = ('ingredient',)
 
 
-@admin.register(Recept)
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'get_author', 'name', 'text',
@@ -31,7 +31,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Тэги')
     def get_tags(self, obj):
-        list_ = [_.name for _ in obj.tags.all()]
+        list_ = [tag_name.name for tag_name in obj.tags.all()]
         return ', '.join(list_)
 
     @admin.display(description=' Ингредиенты ')
@@ -46,6 +46,11 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='В избранном')
     def get_favorite_count(self, obj):
         return obj.favorite_recipe.count()
+        
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'author').prefetch_related('tags',
+                                       'recipeingredient_set__ingredient')
 
 
 @admin.register(Tag)
@@ -65,13 +70,16 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = EMPTY_MSG
 
 
-@admin.register(Subscribe)
-class SubscribeAdmin(admin.ModelAdmin):
+@admin.register(Subscriber)
+class SubscriberAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'user', 'author', 'created',)
     search_fields = (
         'user__email', 'author__email',)
     empty_value_display = EMPTY_MSG
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user', 'author')
 
 
 @admin.register(FavoriteRecipe)
@@ -91,9 +99,13 @@ class FavoriteRecipeAdmin(admin.ModelAdmin):
     def get_count(self, obj):
         return obj.recipe.count()
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'user').prefetch_related('recipe')
+
 
 @admin.register(ShoppingCart)
-class SoppingCartAdmin(admin.ModelAdmin):
+class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'user', 'get_recipe', 'get_count')
     empty_value_display = EMPTY_MSG
@@ -106,3 +118,7 @@ class SoppingCartAdmin(admin.ModelAdmin):
     @admin.display(description='В избранных')
     def get_count(self, obj):
         return obj.recipe.count()
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'user').prefetch_related('recipe')
