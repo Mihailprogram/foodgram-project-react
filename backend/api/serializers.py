@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             Subscriber, Tag)
@@ -188,10 +189,11 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not tags:
             raise serializers.ValidationError(
                 'Нужен хотя бы один тэг для рецепта!')
-        for tag_name in tags:
-            if not Tag.objects.filter(name=tag_name).exists():
-                raise serializers.ValidationError(
-                    f'Тэга {tag_name} не существует!')
+        nonexistent_tags = tags.exclude(
+            name__in=Tag.objects.values_list('name', flat=True))
+
+        if nonexistent_tags.exists():
+            raise ValidationError('Не существует.')
         return data
 
     def validate_cooking_time(self, cooking_time):
