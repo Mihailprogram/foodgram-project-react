@@ -5,7 +5,7 @@ import django.contrib.auth.password_validation as validators
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
 
-from recipes.models import (Ingredient, Recipe, RecipeIngredient, 
+from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             Subscriber, Tag)
 
 User = get_user_model()
