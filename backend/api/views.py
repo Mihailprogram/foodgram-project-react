@@ -1,11 +1,5 @@
 import io
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import make_password
-from django.db.models.aggregates import Count
-from django.db.models.expressions import Exists, OuterRef, Value
-from django.http import FileResponse
-from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -14,20 +8,27 @@ from rest_framework import generics, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view
-from rest_framework.permissions import (SAFE_METHODS, AllowAny,
-                                        IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (SAFE_METHODS, AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from django.db.models.aggregates import Count
+from django.db.models.expressions import Exists, OuterRef, Value
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrReadOnly
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
-                            Subscriber, Tag)
+                            Subscriber, Tag,)
+
 from .serializers import (IngredientSerializer, RecipeReadSerializer,
                           RecipeWriteSerializer, SubscriberRecipeSerializer,
                           SubscriberSerializer, TagSerializer, TokenSerializer,
                           UserCreateSerializer, UserListSerializer,
-                          UserPasswordSerializer)
+                          UserPasswordSerializer,)
 
 User = get_user_model()
 FILENAME = 'shoppingcart.pdf'
@@ -271,7 +272,6 @@ class IngredientsViewSet(
 @api_view(['post'])
 def set_password(request):
     """Изменить пароль."""
-
     serializer = UserPasswordSerializer(
         data=request.data,
         context={'request': request})

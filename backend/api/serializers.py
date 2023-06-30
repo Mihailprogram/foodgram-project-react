@@ -1,12 +1,12 @@
-import django.contrib.auth.password_validation as validators
-from django.contrib.auth import authenticate, get_user_model
-from django.shortcuts import get_object_or_404
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
 
-from recipes.models import (Ingredient, Recipe, RecipeIngredient,
-                            Subscriber, Tag)
+import django.contrib.auth.password_validation as validators
+from django.contrib.auth import authenticate, get_user_model
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscriber, Tag
 
 User = get_user_model()
 ERR_MSG = 'Не удается войти в систему с предоставленными учетными данными.'
@@ -189,11 +189,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not tags:
             raise serializers.ValidationError(
                 'Нужен хотя бы один тэг для рецепта!')
-        nonexistent_tags = tags.exclude(
-            name__in=Tag.objects.values_list('name', flat=True))
 
-        if nonexistent_tags.exists():
-            raise ValidationError('Не существует.')
         return data
 
     def validate_cooking_time(self, cooking_time):

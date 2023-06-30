@@ -1,8 +1,9 @@
-from django.core.exceptions import ValidationError
 import django_filters as filters
 
-from users.models import CustomUser
+from django.core.exceptions import ValidationError
+
 from recipes.models import Ingredient, Recipe
+from users.models import CustomUser
 
 
 class TagsMultipleChoiceField(
