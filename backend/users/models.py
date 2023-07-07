@@ -17,9 +17,6 @@ class CustomUser(AbstractUser):
         max_length=150
     )
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
-
     groups = models.ManyToManyField(
         Group,
         verbose_name='groups',
@@ -33,6 +30,9 @@ class CustomUser(AbstractUser):
         related_name='customuser_set'
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -41,5 +41,3 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
 
-    def get_full_name(self):
-        return f'{self.first_name} {self.last_name}'

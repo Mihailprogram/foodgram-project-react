@@ -33,3 +33,9 @@ python manage.py runserver
 ```url
 http://127.0.0.1/api/docs/
 ```
+
+### Допуст в админку
+
+Почта admin@mail.ru
+Пароль admin2003
+ip сервера 158.160.19.122
