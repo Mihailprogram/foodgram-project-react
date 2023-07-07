@@ -39,3 +39,4 @@ http://127.0.0.1/api/docs/
 Почта admin@mail.ru
 Пароль admin2003
 ip сервера 158.160.19.122
+https://bestweb.ddns.net/subscriptions доменное имя сайт работает нормально
